@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/load")
+@RequestMapping("/v2/load")
 public class LoadController {
 
     @Autowired
@@ -24,7 +24,7 @@ public class LoadController {
     Job job;
 
     @GetMapping
-    public BatchStatus load() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
+    public String load() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
 
 
         Map<String, JobParameter> maps = new HashMap<>();
@@ -34,11 +34,13 @@ public class LoadController {
 
         System.out.println("JobExecution: " + jobExecution.getStatus());
 
+        Long start = System.currentTimeMillis();
         System.out.println("Batch is Running...");
         while (jobExecution.isRunning()) {
             System.out.println("...");
         }
 
-        return jobExecution.getStatus();
+        Long finish = (System.currentTimeMillis() - start);
+        return "FINISHED IN: " + finish.toString();
     }
 }

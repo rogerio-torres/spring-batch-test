@@ -1,8 +1,7 @@
 package com.techprimers.springbatchexample1.config;
 
 import com.techprimers.springbatchexample1.model.User;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
+import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
@@ -33,7 +32,7 @@ public class SpringBatchConfig {
     ) {
 
         Step step = stepBuilderFactory.get("ETL-file-load")
-                .<User, User>chunk(100)
+                .<User, User>chunk(1000)
                 .reader(itemReader)
                 .processor(itemProcessor)
                 .writer(itemWriter)
@@ -43,6 +42,21 @@ public class SpringBatchConfig {
         return jobBuilderFactory.get("ETL-Load")
                 .incrementer(new RunIdIncrementer())
                 .start(step)
+                .listener(
+                    new JobExecutionListener() {
+                        Long start;
+                        @Override
+                        public void beforeJob(JobExecution jobExecution) {
+                            start = System.currentTimeMillis();
+                        }
+
+                        @Override
+                        public void afterJob(JobExecution jobExecution) {
+                            Long end = System.currentTimeMillis() - start;
+                            System.out.println("FINISHED IN: " + end.toString());
+                        }
+                    }
+                )
                 .build();
     }
 
